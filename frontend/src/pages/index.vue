@@ -26,6 +26,8 @@ const { isNotificationsSlideoverOpen } = useDashboard();
         </template>
       </UDashboardNavbar>
     </template>
-    <template #body></template>
+    <template #body>
+      <PDFUploadForm />
+    </template>
   </UDashboardPanel>
 </template>
