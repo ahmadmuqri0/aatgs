@@ -57,7 +57,7 @@ in
   tasks."api:gen" = {
     exec = ''
       cd ${backend}
-      uv run python -c "import json; from src.main import app; print(json.dumps(app.openapi()))" > ${frontend}/openapi.json
+      uv run python -c "import json; from app.main import app; print(json.dumps(app.openapi()))" > ${frontend}/openapi.json
       cd ${frontend}
       pnpm exec openapi-ts
     '';
