@@ -1,0 +1,3 @@
+# Anthropic - Claude
+User-agent: ClaudeBot
+Allow: /
