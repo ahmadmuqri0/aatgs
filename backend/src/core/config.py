@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "Automated Assignment Task Generation System"
     FRONTEND_HOST: str = "http://localhost:5173"
     DATABASE_URL: str = f"sqlite:///{BACKEND_DIR / 'app.db'}"
-    UPLOAD_DIR: Path = BACKEND_DIR / "uploads"
+    UPLOAD_DIR: Path = BACKEND_DIR / "docs"
     MAX_UPLOAD_BYTES: int = 10 * 1024 * 1024
 
 
