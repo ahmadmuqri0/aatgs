@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { useDashboard } from "../composables/useDashboard";
+import { ref } from "vue";
+
+const open = ref(false);
+
+async function onCreated() {
+  open.value = false;
+}
 </script>
 <template>
   <UDashboardPanel id="home">
@@ -8,10 +14,19 @@ import { useDashboard } from "../composables/useDashboard";
         <template #leading>
           <UDashboardSidebarCollapse />
         </template>
+        <template #right>
+          <UModal
+            v-model:open="open"
+            title="add new assignment"
+            description="drop your document here"
+          >
+            <UButton label="+ assignment" color="neutral" variant="subtle" />
+            <template #body>
+              <CreateAssignmentForm @created="onCreated" />
+            </template>
+          </UModal>
+        </template>
       </UDashboardNavbar>
-    </template>
-    <template #body>
-      <PDFUploadForm />
     </template>
   </UDashboardPanel>
 </template>
