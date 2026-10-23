@@ -12,6 +12,8 @@ in
     vtsls
     vue-language-server
     tailwindcss-language-server
+    openssl
+    sqlite
   ];
 
   languages.javascript = {
