@@ -24,7 +24,11 @@ async function onSubmit() {
   loading.value = true;
   try {
     await createAssignment({
-      body: { title: state.title, file: state.file! },
+      body: {
+        title: state.title,
+        file: state.file!,
+      },
+      auth: () => localStorage.getItem("token") ?? undefined,
     });
     toast.add({ title: "Document created", color: "success" });
     state.title = "";
