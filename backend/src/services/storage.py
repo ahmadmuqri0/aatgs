@@ -1,6 +1,7 @@
 import uuid
 from dataclasses import dataclass
 from pathlib import Path
+from typing import cast
 
 import pymupdf
 from fastapi import HTTPException, UploadFile
@@ -16,9 +17,10 @@ class StoredFile:
     filename: str
     path: Path
     size: int
+    text: str
 
 
-def _check_pdf(path: Path) -> None:
+def _check_pdf(path: Path) -> str:
     try:
         doc = pymupdf.open(path)
     except (pymupdf.FileDataError, pymupdf.EmptyFileError) as exc:
@@ -31,6 +33,9 @@ def _check_pdf(path: Path) -> None:
             raise HTTPException(422, "Password-protected PDFs aren't supported")
         if doc.page_count == 0:
             raise HTTPException(422, "PDF has no pages")
+
+        pages = [cast(str, page.get_text("text")) for page in doc]
+        return "\n".join(pages).strip()
 
 
 async def save_pdf(file: UploadFile) -> StoredFile:
@@ -50,9 +55,9 @@ async def save_pdf(file: UploadFile) -> StoredFile:
                 if size > settings.MAX_UPLOAD_BYTES:
                     raise HTTPException(413, "File exceeds the size limit")
                 out.write(chunk)
-        await run_in_threadpool(_check_pdf, path)
+        text = await run_in_threadpool(_check_pdf, path)
     except Exception:
         path.unlink(missing_ok=True)  # no partial or rejected files left behind
         raise
 
-    return StoredFile(filename=path.name, path=path, size=size)
+    return StoredFile(filename=path.name, path=path, size=size, text=text)

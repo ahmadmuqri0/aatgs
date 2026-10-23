@@ -3,21 +3,15 @@ from fastapi.routing import APIRoute
 from starlette.middleware.cors import CORSMiddleware
 
 from src.core.config import settings
-from src.routes import assignments
+from src.routes import assignments, auth
 
 
 def unique_id(route: APIRoute) -> str:
     return route.name
 
 
-# @asynccontextmanager
-# async def lifespan(app: FastAPI):
-#     init_db()
-#     yield
-
 app = FastAPI(
     title=settings.PROJECT_NAME,
-    # lifespan=lifespan,
     generate_unique_id_function=unique_id,
 )
 
@@ -34,4 +28,5 @@ def read_root():
     return {"message": "hello"}
 
 
+app.include_router(auth.router)
 app.include_router(assignments.router)
