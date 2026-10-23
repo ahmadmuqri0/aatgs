@@ -6,7 +6,7 @@ import pymupdf
 from fastapi import HTTPException, UploadFile
 from starlette.concurrency import run_in_threadpool
 
-from .config import settings
+from src.core.config import settings
 
 CHUNK_SIZE = 1024 * 1024
 

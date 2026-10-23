@@ -3,8 +3,8 @@ from typing import Annotated, Any
 from fastapi import Form, UploadFile
 from fastapi.routing import APIRouter
 
-from src.core.storage import save_pdf
 from src.models import Assignment, AssignmentPublic
+from src.services.storage import save_pdf
 
 router = APIRouter(prefix="/api/assignments", tags=["assignments"])
 
