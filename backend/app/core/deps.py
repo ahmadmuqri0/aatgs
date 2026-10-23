@@ -4,9 +4,10 @@ from typing import Annotated
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 
-from src.core.db import SessionDep
-from src.core.security import decode_access_token
-from src.models import User
+from app.models import User
+
+from .db import SessionDep
+from .security import decode_access_token
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 TokenDep = Annotated[str, Depends(oauth2_scheme)]

@@ -5,10 +5,10 @@ from fastapi import Form, HTTPException, UploadFile
 from fastapi.routing import APIRouter
 from sqlmodel import col, select
 
-from src.core.db import SessionDep
-from src.core.deps import CurrentUser
-from src.models import Assignment, AssignmentPublic
-from src.services.storage import save_pdf
+from app.core.db import SessionDep
+from app.core.deps import CurrentUser
+from app.models import Assignment, AssignmentPublic
+from app.services.storage import save_pdf
 
 router = APIRouter(prefix="/api/assignments", tags=["assignments"])
 

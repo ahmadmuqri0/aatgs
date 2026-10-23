@@ -5,7 +5,7 @@ from fastapi import Depends
 from sqlalchemy import event
 from sqlmodel import Session, create_engine
 
-from src.core.config import settings
+from .config import settings
 
 engine = create_engine(
     settings.DATABASE_URL,

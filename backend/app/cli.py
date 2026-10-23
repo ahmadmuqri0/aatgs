@@ -1,9 +1,9 @@
 import sys
 
+from alembic import command
 from alembic.config import Config
 
-from alembic import command
-from src.core.config import BACKEND_DIR
+from .core.config import BACKEND_DIR
 
 
 def _cfg() -> Config:
