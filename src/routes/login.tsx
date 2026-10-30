@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { useMutation } from '@tanstack/react-query';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { AlertCircleIcon, Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -23,6 +24,7 @@ import {
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { useLogin } from '@/hooks/auth';
+import { authClient } from '@/lib/auth-client';
 
 export const Route = createFileRoute('/login')({
   component: Login,
@@ -30,8 +32,7 @@ export const Route = createFileRoute('/login')({
 
 function Login() {
   const [showPassword, setShowPassword] = useState(false);
-
-  const login = useLogin();
+  const navigate = useNavigate();
 
   const schema = z.object({
     email: z.email(),
@@ -48,6 +49,14 @@ function Login() {
       password: '',
       rememberMe: false,
     },
+  });
+
+  const login = useMutation({
+    mutationFn: async (input: FormSchema) => {
+      const { error } = await authClient.signIn.email(input);
+      if (error) throw new Error(error.message || 'unable to login');
+    },
+    onSuccess: () => navigate({ to: '/' }),
   });
 
   function onSubmit(data: FormSchema) {

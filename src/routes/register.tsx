@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { useMutation } from '@tanstack/react-query';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -21,6 +22,7 @@ import {
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { useRegister } from '@/hooks/auth';
+import { authClient } from '@/lib/auth-client';
 
 export const Route = createFileRoute('/register')({
   component: Register,
@@ -29,8 +31,7 @@ export const Route = createFileRoute('/register')({
 function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-
-  const register = useRegister();
+  const navigate = useNavigate();
 
   const schema = z
     .object({
@@ -57,6 +58,18 @@ function Register() {
       password: '',
       confirm: '',
     },
+  });
+
+  const register = useMutation({
+    mutationFn: async (input: {
+      name: string;
+      email: string;
+      password: string;
+    }) => {
+      const { error } = await authClient.signUp.email(input);
+      if (error) throw new Error(error.message || 'Unable to create account');
+    },
+    onSuccess: () => navigate({ to: '/' }),
   });
 
   function onSubmit(data: FormSchema) {
@@ -189,7 +202,9 @@ function Register() {
                 />
                 <FieldGroup>
                   <Field>
-                    <Button type="submit">Create Account</Button>
+                    <Button type="submit" disabled={register.isPending}>
+                      Create Account
+                    </Button>
                     <FieldDescription className="px-6 text-center">
                       Already have an account? <Link to="/login">Log in</Link>
                     </FieldDescription>
