@@ -1,4 +1,10 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import { createFileRoute, Link } from '@tanstack/react-router';
+import { AlertCircleIcon, Eye, EyeOff } from 'lucide-react';
+import { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import z from 'zod';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -7,9 +13,11 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Field,
   FieldDescription,
+  FieldError,
   FieldGroup,
   FieldLabel,
 } from '@/components/ui/field';
@@ -21,14 +29,32 @@ export const Route = createFileRoute('/login')({
 });
 
 function Login() {
+  const [showPassword, setShowPassword] = useState(false);
+
   const login = useLogin();
 
-  function _onSubmit(e: React.SubmitEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const form = new FormData(e.currentTarget);
+  const schema = z.object({
+    email: z.email(),
+    password: z.string().min(1, 'Please enter your password'),
+    rememberMe: z.boolean(),
+  });
+
+  type FormSchema = z.infer<typeof schema>;
+
+  const form = useForm<FormSchema>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      email: '',
+      password: '',
+      rememberMe: false,
+    },
+  });
+
+  function onSubmit(data: FormSchema) {
     login.mutate({
-      email: String(form.get('email')),
-      password: String(form.get('password')),
+      email: data.email,
+      password: data.password,
+      rememberMe: data.rememberMe,
     });
   }
 
@@ -44,28 +70,89 @@ function Login() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form>
+              <form id="login-form" onSubmit={form.handleSubmit(onSubmit)}>
                 <FieldGroup>
+                  <Controller
+                    name="email"
+                    control={form.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                        <Input
+                          {...field}
+                          id={field.name}
+                          type="email"
+                          aria-invalid={fieldState.invalid}
+                          placeholder="m@example.com"
+                          autoComplete="off"
+                        />
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                  <Controller
+                    name="password"
+                    control={form.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                        <div className="relative">
+                          <Input
+                            {...field}
+                            id={field.name}
+                            type={showPassword ? 'text' : 'password'}
+                            className="pr-10"
+                          />
+                          <Button
+                            variant={'ghost'}
+                            size={'sm'}
+                            onClick={() =>
+                              setShowPassword((current) => !current)
+                            }
+                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                          >
+                            {showPassword ? (
+                              <EyeOff className="h-4 w-4" />
+                            ) : (
+                              <Eye className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                  <Controller
+                    name="rememberMe"
+                    control={form.control}
+                    render={({ field }) => (
+                      <Field orientation="horizontal">
+                        <Checkbox
+                          id={field.name}
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                        <FieldLabel htmlFor={field.name}>
+                          Remember me
+                        </FieldLabel>
+                      </Field>
+                    )}
+                  />
+                  {login.isError && (
+                    <Alert className="max-w-md border-red-200 bg-red-50 text-red-900 dark:border-red-900 dark:bg-red-950 dark:text-red-50">
+                      <AlertCircleIcon />
+                      <AlertTitle>{login.error.name}</AlertTitle>
+                      <AlertDescription>{login.error.message}</AlertDescription>
+                    </Alert>
+                  )}
                   <Field>
-                    <FieldLabel htmlFor="email">Email</FieldLabel>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="m@example.com"
-                      required
-                    />
-                  </Field>
-                  <Field>
-                    <div className="flex items-center">
-                      <FieldLabel htmlFor="password">Password</FieldLabel>
-                      <span className="ml-auto inline-block text-sm underline-offset-4 hover:underline">
-                        Forgot your password?
-                      </span>
-                    </div>
-                    <Input id="password" type="password" required />
-                  </Field>
-                  <Field>
-                    <Button type="submit">Login</Button>
+                    <Button type="submit" disabled={login.isPending}>
+                      Login
+                    </Button>
                     <FieldDescription className="text-center">
                       Don&apos;t have an account?{' '}
                       <Link to="/register">Register</Link>

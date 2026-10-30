@@ -6,7 +6,11 @@ export function useLogin() {
   const navigate = useNavigate();
 
   return useMutation({
-    mutationFn: async (input: { email: string; password: string }) => {
+    mutationFn: async (input: {
+      email: string;
+      password: string;
+      rememberMe: boolean;
+    }) => {
       const { data, error } = await authClient.signIn.email(input);
       if (error) throw new Error(error.message || 'unable to login');
       return data;
@@ -31,6 +35,7 @@ export function useRegister() {
     onSuccess: () => navigate({ to: '/' }),
   });
 }
+
 export function useLogout() {
   const router = useRouter();
   const queryClient = useQueryClient();

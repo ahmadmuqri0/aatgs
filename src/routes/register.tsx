@@ -1,4 +1,9 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import { createFileRoute, Link } from '@tanstack/react-router';
+import { Eye, EyeOff } from 'lucide-react';
+import { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import z from 'zod';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -10,6 +15,7 @@ import {
 import {
   Field,
   FieldDescription,
+  FieldError,
   FieldGroup,
   FieldLabel,
 } from '@/components/ui/field';
@@ -21,15 +27,43 @@ export const Route = createFileRoute('/register')({
 });
 
 function Register() {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
   const register = useRegister();
 
-  function _onSubmit(e: React.SubmitEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const form = new FormData(e.currentTarget);
+  const schema = z
+    .object({
+      fullName: z.string().min(1, 'Please enter your name'),
+      email: z.email(),
+      password: z
+        .string('Require a password')
+        .min(8, 'Min 8 character')
+        .max(128, 'Max 128 character'),
+      confirm: z.string('Please confirm your password'),
+    })
+    .refine((data) => data.password === data.confirm, {
+      error: 'Password do not match',
+      path: ['confirm'],
+    });
+
+  type FormSchema = z.infer<typeof schema>;
+
+  const form = useForm<FormSchema>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      fullName: '',
+      email: '',
+      password: '',
+      confirm: '',
+    },
+  });
+
+  function onSubmit(data: FormSchema) {
     register.mutate({
-      name: String(form.get('name')),
-      email: String(form.get('email')),
-      password: String(form.get('password')),
+      name: data.fullName,
+      email: data.email,
+      password: data.password,
     });
   }
 
@@ -44,46 +78,115 @@ function Register() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form>
+            <form id="login-form" onSubmit={form.handleSubmit(onSubmit)}>
               <FieldGroup>
-                <Field>
-                  <FieldLabel htmlFor="name">Full Name</FieldLabel>
-                  <Input
-                    id="name"
-                    type="text"
-                    placeholder="John Doe"
-                    required
-                  />
-                </Field>
-                <Field>
-                  <FieldLabel htmlFor="email">Email</FieldLabel>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="m@example.com"
-                    required
-                  />
-                  <FieldDescription>
-                    We&apos;ll use this to contact you. We will not share your
-                    email with anyone else.
-                  </FieldDescription>
-                </Field>
-                <Field>
-                  <FieldLabel htmlFor="password">Password</FieldLabel>
-                  <Input id="password" type="password" required />
-                  <FieldDescription>
-                    Must be at least 8 characters long.
-                  </FieldDescription>
-                </Field>
-                <Field>
-                  <FieldLabel htmlFor="confirm-password">
-                    Confirm Password
-                  </FieldLabel>
-                  <Input id="confirm-password" type="password" required />
-                  <FieldDescription>
-                    Please confirm your password.
-                  </FieldDescription>
-                </Field>
+                <Controller
+                  name="fullName"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor={field.name}>Full Name</FieldLabel>
+                      <Input
+                        {...field}
+                        id={field.name}
+                        type="text"
+                        aria-invalid={fieldState.invalid}
+                        placeholder="John Doe"
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+                <Controller
+                  name="email"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                      <Input
+                        {...field}
+                        id={field.name}
+                        type="email"
+                        placeholder="m@example.com"
+                        autoComplete="off"
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+                <Controller
+                  name="password"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                      <div className="relative">
+                        <Input
+                          {...field}
+                          id={field.name}
+                          type={showPassword ? 'text' : 'password'}
+                          className="pr-10"
+                        />
+                        <Button
+                          variant={'ghost'}
+                          size={'sm'}
+                          onClick={() => setShowPassword((current) => !current)}
+                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+                <Controller
+                  name="confirm"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor={field.name}>
+                        Confirm Password
+                      </FieldLabel>
+                      <div className="relative">
+                        <Input
+                          {...field}
+                          id={field.name}
+                          type={showConfirm ? 'text' : 'password'}
+                          className="pr-10"
+                        />
+
+                        <Button
+                          variant={'ghost'}
+                          size={'sm'}
+                          onClick={() => setShowConfirm((current) => !current)}
+                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        >
+                          {showConfirm ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
                 <FieldGroup>
                   <Field>
                     <Button type="submit">Create Account</Button>
