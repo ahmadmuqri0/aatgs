@@ -26,6 +26,15 @@
     };
   };
 
+  processes = {
+    nitro = {
+      exec = "pnpm dev";
+    };
+    drizzle = {
+      exec = "pnpm db:studio";
+    };
+  };
+
   git-hooks.hooks = {
     biome = {
       enable = true;
