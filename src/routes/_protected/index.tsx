@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { useLogout } from '#/hooks/auth';
+import { Button } from '@/components/ui/button';
+import { useLogout } from '@/hooks/auth';
 
 export const Route = createFileRoute('/_protected/')({ component: Home });
 
@@ -14,14 +15,14 @@ function Home() {
       <p className="mt-4 text-lg">
         Edit <code>src/routes/index.tsx</code> to get started.
       </p>
-      <button
-        className="bg-slate-800 text-slate-100 px-3 py-1 rounded-md disabled:bg-slate-600 disabled:text-slate-300"
+      <Button
         type="button"
+        size={'lg'}
         onClick={() => logout.mutate()}
         disabled={logout.isPending}
       >
         {logout.isPending ? 'Logging out...' : 'logout'}
-      </button>
+      </Button>
     </div>
   );
 }

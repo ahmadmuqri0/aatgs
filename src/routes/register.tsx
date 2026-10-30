@@ -1,15 +1,29 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { Field } from '#/components/Field';
-import { useRegister } from '#/hooks/auth';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+} from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import { useRegister } from '@/hooks/auth';
 
 export const Route = createFileRoute('/register')({
-  component: RouteComponent,
+  component: Register,
 });
 
-function RouteComponent() {
+function Register() {
   const register = useRegister();
 
-  function onSubmit(e: React.SubmitEvent<HTMLFormElement>) {
+  function _onSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
     register.mutate({
@@ -20,37 +34,69 @@ function RouteComponent() {
   }
 
   return (
-    <main className="mx-auto mt-16 w-full max-w-sm px-4">
-      <h1 className="mb-6 text-2xl font-semibold">Create account</h1>
-      <form onSubmit={onSubmit} className="flex flex-col gap-4">
-        <Field id="name" label="Name" autoComplete="name" />
-        <Field id="email" label="Email" type="email" autoComplete="email" />
-        <Field
-          id="password"
-          label="Password"
-          type="password"
-          minLength={8}
-          autoComplete="new-password"
-        />
-        {register.error && (
-          <p role="alert" className="text-sm text-red-600">
-            {register.error.message}
-          </p>
-        )}
-        <button
-          type="submit"
-          disabled={register.isPending}
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-        >
-          {register.isPending ? 'Creating account…' : 'Create account'}
-        </button>
-      </form>
-      <p className="mt-4 text-sm text-gray-600">
-        Already registered?{' '}
-        <Link to="/login" className="text-blue-600 hover:underline">
-          Log in
-        </Link>
-      </p>
-    </main>
+    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+      <div className="w-full max-w-sm">
+        <Card>
+          <CardHeader>
+            <CardTitle>Create an account</CardTitle>
+            <CardDescription>
+              Enter your information below to create your account
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form>
+              <FieldGroup>
+                <Field>
+                  <FieldLabel htmlFor="name">Full Name</FieldLabel>
+                  <Input
+                    id="name"
+                    type="text"
+                    placeholder="John Doe"
+                    required
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="email">Email</FieldLabel>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="m@example.com"
+                    required
+                  />
+                  <FieldDescription>
+                    We&apos;ll use this to contact you. We will not share your
+                    email with anyone else.
+                  </FieldDescription>
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="password">Password</FieldLabel>
+                  <Input id="password" type="password" required />
+                  <FieldDescription>
+                    Must be at least 8 characters long.
+                  </FieldDescription>
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="confirm-password">
+                    Confirm Password
+                  </FieldLabel>
+                  <Input id="confirm-password" type="password" required />
+                  <FieldDescription>
+                    Please confirm your password.
+                  </FieldDescription>
+                </Field>
+                <FieldGroup>
+                  <Field>
+                    <Button type="submit">Create Account</Button>
+                    <FieldDescription className="px-6 text-center">
+                      Already have an account? <Link to="/login">Log in</Link>
+                    </FieldDescription>
+                  </Field>
+                </FieldGroup>
+              </FieldGroup>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 }

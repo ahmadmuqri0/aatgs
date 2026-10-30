@@ -27,6 +27,9 @@
   };
 
   git-hooks.hooks = {
-    biome.enable = true;
+    biome = {
+      enable = true;
+      settings.binPath = "./node_modules/.bin/biome";
+    };
   };
 }

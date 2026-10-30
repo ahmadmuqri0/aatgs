@@ -1,15 +1,29 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { Field } from '#/components/Field';
-import { useLogin } from '#/hooks/auth';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+} from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import { useLogin } from '@/hooks/auth';
 
 export const Route = createFileRoute('/login')({
-  component: RouteComponent,
+  component: Login,
 });
 
-function RouteComponent() {
+function Login() {
   const login = useLogin();
 
-  function onSubmit(e: React.SubmitEvent<HTMLFormElement>) {
+  function _onSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
     login.mutate({
@@ -17,36 +31,52 @@ function RouteComponent() {
       password: String(form.get('password')),
     });
   }
+
   return (
-    <main className="mx-auto mt-16 w-full max-w-sm px-4">
-      <h1 className="mb-6 text-2xl font-semibold">Log in</h1>
-      <form onSubmit={onSubmit} className="flex flex-col gap-4">
-        <Field id="email" label="Email" type="email" autoComplete="email" />
-        <Field
-          id="password"
-          label="Password"
-          type="password"
-          autoComplete="current-password"
-        />
-        {login.error && (
-          <p role="alert" className="text-sm text-red-600">
-            {login.error.message}
-          </p>
-        )}
-        <button
-          type="submit"
-          disabled={login.isPending}
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-        >
-          {login.isPending ? 'Logging in…' : 'Log in'}
-        </button>
-      </form>
-      <p className="mt-4 text-sm text-gray-600">
-        No account?{' '}
-        <Link to="/register" className="text-blue-600 hover:underline">
-          Create one
-        </Link>
-      </p>
-    </main>
+    <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6 md:p-10">
+      <div className="w-full max-w-sm">
+        <div className="flex flex-col gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Login to your account</CardTitle>
+              <CardDescription>
+                Enter your email below to login to your account
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form>
+                <FieldGroup>
+                  <Field>
+                    <FieldLabel htmlFor="email">Email</FieldLabel>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="m@example.com"
+                      required
+                    />
+                  </Field>
+                  <Field>
+                    <div className="flex items-center">
+                      <FieldLabel htmlFor="password">Password</FieldLabel>
+                      <span className="ml-auto inline-block text-sm underline-offset-4 hover:underline">
+                        Forgot your password?
+                      </span>
+                    </div>
+                    <Input id="password" type="password" required />
+                  </Field>
+                  <Field>
+                    <Button type="submit">Login</Button>
+                    <FieldDescription className="text-center">
+                      Don&apos;t have an account?{' '}
+                      <Link to="/register">Register</Link>
+                    </FieldDescription>
+                  </Field>
+                </FieldGroup>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
   );
 }
