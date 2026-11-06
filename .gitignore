@@ -8,3 +8,18 @@ devenv.local.yaml
 
 # pre-commit
 .pre-commit-config.yaml
+
+# tanstack
+node_modules
+.DS_Store
+dist
+dist-ssr
+*.local
+.env
+.nitro
+.tanstack
+.wrangler
+.output
+.vinxi
+__unconfig*
+todos.json
