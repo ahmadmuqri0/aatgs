@@ -1,197 +1,69 @@
-Welcome to your new TanStack Start app!
+# AATGS — Automated Assignment Task Generation System
 
-# Getting Started
+AATGS turns an assignment brief into a step-by-step, actionable task list that a student can follow to complete their assignment. You paste in a brief, AI breaks it down, and you get a todo-style checklist.
 
-To run this application:
+## Tech Stack
 
-```bash
-pnpm install
-pnpm dev
-```
+- [TanStack Start](https://tanstack.com/start): full-stack React framework with file-based routing and server functions
+- [TanStack Query](https://tanstack.com/query): data fetching and caching, with SSR integration
+- [Gemini AI](https://ai.google.dev/): generates tasks from assignment briefs
+- [Drizzle ORM](https://orm.drizzle.team/): database access and migrations
+- [Tailwind CSS v4](https://tailwindcss.com/) and [shadcn/ui](https://ui.shadcn.com/): styling and UI components
+- [Oxlint](https://oxc.rs/docs/guide/usage/linter) and [Oxfmt](https://oxc.rs/docs/guide/usage/formatter): linting, type-checking and formatting
+- [devenv](https://devenv.sh/): reproducible development environment
 
-# Building For Production
+## Getting Started
 
-To build this application for production:
+### Prerequisites
 
-```bash
-pnpm build
-```
-
-## Styling
-
-This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
-
-### Removing Tailwind CSS
-
-If you prefer not to use Tailwind CSS:
-
-1. Remove the demo pages in `src/routes/demo/`
-2. Replace the Tailwind import in `src/styles.css` with your own styles
-3. Remove `tailwindcss()` from the plugins array in `vite.config.ts`
-4. Remove `@tailwindcss/vite` and `tailwindcss` from `package.json`
-
-
-## Deploy with Nitro
-
-This project uses Nitro as a generic server adapter, so it can run on any Node-compatible host.
+The development environment is defined in `devenv.nix`. With [devenv](https://devenv.sh/) installed, enter it with:
 
 ```bash
-npm run build
-node .output/server/index.mjs
+devenv shell
 ```
 
-The build output is a self-contained Node server. To deploy, push the `.output/` directory to your host (Render, Fly.io, your own VPS, etc.) and run the server command above.
+Otherwise, install Node.js and pnpm yourself.
 
-For host-specific presets (Vercel, Netlify, Cloudflare, AWS Lambda, etc.) and tuning, see https://v3.nitro.build/deploy.
+### Setup
 
+1. Install dependencies:
 
+   ```bash
+   pnpm install
+   ```
 
-## Routing
+2. Copy the `.env.example` into `.env.local` file in the project root with your environment variables (Gemini API key, database URL). This file is gitignored and must never be committed.
 
-This project uses [TanStack Router](https://tanstack.com/router) with file-based routing. Routes are managed as files in `src/routes`.
+3. Start the dev server at http://localhost:3000:
 
-### Adding A Route
+   ```bash
+   pnpm dev
+   ```
 
-To add a new route to your application just add a new file in the `./src/routes` directory.
+## Commands
 
-TanStack will automatically generate the content of the route file for you.
+| Command        | Description                                                    |
+| -------------- | -------------------------------------------------------------- |
+| `pnpm dev`     | Start the dev server on port 3000                              |
+| `pnpm build`   | Build for production (also regenerates `src/routeTree.gen.ts`) |
+| `pnpm preview` | Preview the production build                                   |
+| `pnpm lint`    | Lint and type-check                                            |
+| `pnpm format`  | Format the codebase with oxfmt                                 |
 
-Now that you have two routes you can use a `Link` component to navigate between them.
+## Project Structure
 
-### Adding Links
-
-To use SPA (Single Page Application) navigation you will need to import the `Link` component from `@tanstack/react-router`.
-
-```tsx
-import { Link } from "@tanstack/react-router";
 ```
-
-Then anywhere in your JSX you can use it like so:
-
-```tsx
-<Link to="/about">About</Link>
+src/
+├── routes/          # File-based page routes (__root.tsx is the root layout)
+├── components/      # UI components
+│   └── ui/          # shadcn components (added via the shadcn CLI)
+├── lib/             # Shared code safe for client and server
+├── server/          # Server-only code (Gemini integration, business logic)
+├── func/            # Server functions (createServerFn) exposing src/server to routes
+├── db/              # Drizzle client and queries (server-only)
+│   └── schema/      # Drizzle table schemas
+├── router.tsx       # Router setup with react-query SSR integration
+├── routeTree.gen.ts # Generated route tree
+└── styles.css       # Global stylesheet (Tailwind entry point)
+drizzle/             # Generated migrations
 ```
-
-This will create a link that will navigate to the `/about` route.
-
-More information on the `Link` component can be found in the [Link documentation](https://tanstack.com/router/v1/docs/framework/react/api/router/linkComponent).
-
-### Using A Layout
-
-In the File Based Routing setup the layout is located in `src/routes/__root.tsx`. Anything you add to the root route will appear in all the routes. The route content will appear in the JSX where you render `{children}` in the `shellComponent`.
-
-Here is an example layout that includes a header:
-
-```tsx
-import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
-
-export const Route = createRootRoute({
-  head: () => ({
-    meta: [
-      { charSet: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: 'My App' },
-    ],
-  }),
-  shellComponent: ({ children }) => (
-    <html lang="en">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        <header>
-          <nav>
-            <Link to="/">Home</Link>
-            <Link to="/about">About</Link>
-          </nav>
-        </header>
-        {children}
-        <Scripts />
-      </body>
-    </html>
-  ),
-})
-```
-
-More information on layouts can be found in the [Layouts documentation](https://tanstack.com/router/latest/docs/framework/react/guide/routing-concepts#layouts).
-
-## Server Functions
-
-TanStack Start provides server functions that allow you to write server-side code that seamlessly integrates with your client components.
-
-```tsx
-import { createServerFn } from '@tanstack/react-start'
-
-const getServerTime = createServerFn({
-  method: 'GET',
-}).handler(async () => {
-  return new Date().toISOString()
-})
-
-// Use in a component
-function MyComponent() {
-  const [time, setTime] = useState('')
-  
-  useEffect(() => {
-    getServerTime().then(setTime)
-  }, [])
-  
-  return <div>Server time: {time}</div>
-}
-```
-
-## API Routes
-
-You can create API routes by using the `server` property in your route definitions:
-
-```tsx
-import { createFileRoute } from '@tanstack/react-router'
-import { json } from '@tanstack/react-start'
-
-export const Route = createFileRoute('/api/hello')({
-  server: {
-    handlers: {
-      GET: () => json({ message: 'Hello, World!' }),
-    },
-  },
-})
-```
-
-## Data Fetching
-
-There are multiple ways to fetch data in your application. You can use TanStack Query to fetch data from a server. But you can also use the `loader` functionality built into TanStack Router to load the data for a route before it's rendered.
-
-For example:
-
-```tsx
-import { createFileRoute } from '@tanstack/react-router'
-
-export const Route = createFileRoute('/people')({
-  loader: async () => {
-    const response = await fetch('https://swapi.dev/api/people')
-    return response.json()
-  },
-  component: PeopleComponent,
-})
-
-function PeopleComponent() {
-  const data = Route.useLoaderData()
-  return (
-    <ul>
-      {data.results.map((person) => (
-        <li key={person.name}>{person.name}</li>
-      ))}
-    </ul>
-  )
-}
-```
-
-Loaders simplify your data fetching logic dramatically. Check out more information in the [Loader documentation](https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#loader-parameters).
-
-
-
-# Learn More
-
-You can learn more about all of the offerings from TanStack in the [TanStack documentation](https://tanstack.com).
-
-For TanStack Start specific documentation, visit [TanStack Start](https://tanstack.com/start).
