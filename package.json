@@ -11,7 +11,10 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "oxlint",
-    "format": "oxfmt"
+    "format": "oxfmt",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",
@@ -22,6 +25,7 @@
     "@tanstack/react-router-devtools": "1.167.2",
     "@tanstack/react-router-ssr-query": "1.167.3",
     "@tanstack/react-start": "1.169.4",
+    "better-auth": "^1.7.18",
     "better-sqlite3": "^13.0.3",
     "dotenv": "^18.0.9",
     "drizzle-orm": "^1.0.0-rc.5",
