@@ -8,4 +8,5 @@ export default defineConfig({
   trailingComma: 'all',
   sortImports: true,
   sortTailwindcss: true,
+  ignorePatterns: ['dist/**', 'src/components/ui/**', 'src/routeTree.gen.ts'],
 });
