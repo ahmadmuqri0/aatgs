@@ -8,4 +8,5 @@ export default defineConfig({
   rules: {
     'no-unused-vars': 'warn',
   },
+  ignorePatterns: ['.agents/**', '.claude/**'],
 });
