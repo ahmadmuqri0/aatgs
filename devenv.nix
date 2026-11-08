@@ -25,4 +25,21 @@
     };
   };
 
+  git-hooks.hooks = {
+    oxlint = {
+      enable = true;
+      settings = {
+        binPath = "./node_modules/.bin/oxlint";
+        configPath = "./oxlint.config.ts";
+      };
+    };
+    oxfmt = {
+      enable = true;
+      settings = {
+        binPath = "./node_modules/.bin/oxfmt";
+        configPath = "./oxfmt.config.ts";
+      };
+    };
+  };
+
 }
