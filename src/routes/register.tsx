@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-router';
 import { AlertCircleIcon, EyeIcon, EyeOffIcon } from 'lucide-react';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -11,9 +11,16 @@ import { Button } from '#/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#/components/ui/card';
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '#/components/ui/field';
 import { Input } from '#/components/ui/input';
+import { getSession } from '#/func/auth.function';
 import { authClient } from '#/lib/auth-client';
 
 export const Route = createFileRoute('/register')({
+  beforeLoad: async () => {
+    const session = await getSession();
+    if (session) {
+      throw redirect({ to: '/' });
+    }
+  },
   component: Register,
 });
 
