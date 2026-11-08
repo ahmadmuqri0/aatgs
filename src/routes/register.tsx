@@ -1,11 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
-import { EyeIcon, EyeOffIcon } from 'lucide-react';
+import { AlertCircleIcon, EyeIcon, EyeOffIcon } from 'lucide-react';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import z from 'zod';
 
+import { Alert, AlertDescription, AlertTitle } from '#/components/ui/alert';
 import { Button } from '#/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#/components/ui/card';
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '#/components/ui/field';
@@ -49,7 +50,7 @@ function Register() {
     },
   });
 
-  const { mutate, isPending } = useMutation({
+  const { mutate, error, isError, isPending } = useMutation({
     mutationFn: async (input: { name: string; email: string; password: string }) => {
       const { error } = await authClient.signUp.email(input);
       if (error) throw new Error(error.message || 'Unable to create account');
@@ -174,16 +175,21 @@ function Register() {
                       </Field>
                     )}
                   />
-                  <FieldGroup>
-                    <Field>
-                      <Button type="submit" disabled={isPending}>
-                        Create Account
-                      </Button>
-                      <FieldDescription className="px-6 text-center">
-                        Already have an account? <Link to="/login">Log in</Link>
-                      </FieldDescription>
-                    </Field>
-                  </FieldGroup>
+                  {isError && (
+                    <Alert className="max-w-md border-red-200 bg-red-50 text-red-900 dark:border-red-900 dark:bg-red-950 dark:text-red-50">
+                      <AlertCircleIcon />
+                      <AlertTitle>{error.name}</AlertTitle>
+                      <AlertDescription>{error.message}</AlertDescription>
+                    </Alert>
+                  )}
+                  <Field>
+                    <Button type="submit" disabled={isPending}>
+                      Create Account
+                    </Button>
+                    <FieldDescription className="px-6 text-center">
+                      Already have an account? <Link to="/login">Log in</Link>
+                    </FieldDescription>
+                  </Field>
                 </FieldGroup>
               </form>
             </CardContent>
