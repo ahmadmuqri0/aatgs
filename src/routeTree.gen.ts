@@ -13,6 +13,8 @@ import { Route as ProtectedRouteImport } from './routes/_protected'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ProtectedIndexRouteImport } from './routes/_protected/index'
+import { Route as ProtectedAssignmentsRouteImport } from './routes/_protected/assignments'
+import { Route as ProtectedAssignmentsIndexRouteImport } from './routes/_protected/assignments/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const ProtectedRoute = ProtectedRouteImport.update({
@@ -34,6 +36,17 @@ const ProtectedIndexRoute = ProtectedIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ProtectedRoute,
 } as any)
+const ProtectedAssignmentsRoute = ProtectedAssignmentsRouteImport.update({
+  id: '/assignments',
+  path: '/assignments',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedAssignmentsIndexRoute =
+  ProtectedAssignmentsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => ProtectedAssignmentsRoute,
+  } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -44,34 +57,47 @@ export interface FileRoutesByFullPath {
   '/': typeof ProtectedIndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/assignments': typeof ProtectedAssignmentsRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/assignments/': typeof ProtectedAssignmentsIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/': typeof ProtectedIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/assignments': typeof ProtectedAssignmentsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_protected': typeof ProtectedRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/_protected/assignments': typeof ProtectedAssignmentsRouteWithChildren
   '/_protected/': typeof ProtectedIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/_protected/assignments/': typeof ProtectedAssignmentsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/register' | '/api/auth/$'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/register'
+    | '/assignments'
+    | '/api/auth/$'
+    | '/assignments/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/register' | '/' | '/api/auth/$'
+  to: '/login' | '/register' | '/' | '/api/auth/$' | '/assignments'
   id:
     | '__root__'
     | '/_protected'
     | '/login'
     | '/register'
+    | '/_protected/assignments'
     | '/_protected/'
     | '/api/auth/$'
+    | '/_protected/assignments/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -111,6 +137,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedIndexRouteImport
       parentRoute: typeof ProtectedRoute
     }
+    '/_protected/assignments': {
+      id: '/_protected/assignments'
+      path: '/assignments'
+      fullPath: '/assignments'
+      preLoaderRoute: typeof ProtectedAssignmentsRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/assignments/': {
+      id: '/_protected/assignments/'
+      path: '/'
+      fullPath: '/assignments/'
+      preLoaderRoute: typeof ProtectedAssignmentsIndexRouteImport
+      parentRoute: typeof ProtectedAssignmentsRoute
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -121,11 +161,24 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface ProtectedAssignmentsRouteChildren {
+  ProtectedAssignmentsIndexRoute: typeof ProtectedAssignmentsIndexRoute
+}
+
+const ProtectedAssignmentsRouteChildren: ProtectedAssignmentsRouteChildren = {
+  ProtectedAssignmentsIndexRoute: ProtectedAssignmentsIndexRoute,
+}
+
+const ProtectedAssignmentsRouteWithChildren =
+  ProtectedAssignmentsRoute._addFileChildren(ProtectedAssignmentsRouteChildren)
+
 interface ProtectedRouteChildren {
+  ProtectedAssignmentsRoute: typeof ProtectedAssignmentsRouteWithChildren
   ProtectedIndexRoute: typeof ProtectedIndexRoute
 }
 
 const ProtectedRouteChildren: ProtectedRouteChildren = {
+  ProtectedAssignmentsRoute: ProtectedAssignmentsRouteWithChildren,
   ProtectedIndexRoute: ProtectedIndexRoute,
 }
 

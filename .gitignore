@@ -26,3 +26,6 @@ todos.json
 
 # database
 *.db
+
+# uploads
+uploads

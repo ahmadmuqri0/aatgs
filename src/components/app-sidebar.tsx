@@ -19,7 +19,7 @@ import type { NavItem } from '#/types';
 const items: NavItem[] = [
   {
     title: 'Assignment',
-    url: '/',
+    url: '/assignments',
     icon: <BookOpenIcon />,
   },
 ];
