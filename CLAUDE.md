@@ -2,6 +2,8 @@
 
 Automated Assignment Task Generation System or AATGS is a tanstack-start project integrate with GeminiAI to turn assignment brief into step-by-step, actionable, todo-like tasklists that student can follow to complete their assignment
 
+This project will be **local** only and will **not be deployed**. It will also not use paid services for `storage`, `database` and etc.
+
 ## Repository layout
 
 - `src/routes` contains tanstack-start file-based page routes
