@@ -4,6 +4,7 @@ import { AlertCircleIcon, PlusIcon } from 'lucide-react';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
+import { DatePickerInput } from '#/components/date-picker';
 import { Alert, AlertDescription, AlertTitle } from '#/components/ui/alert';
 import { Button } from '#/components/ui/button';
 import {
@@ -106,12 +107,13 @@ export function CreateAssignmentDialog() {
               name="dueDate"
               control={control}
               render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>Due date</FieldLabel>
-                  <Input {...field} id={field.name} type="date" aria-invalid={fieldState.invalid} />
-                  <FieldDescription>Optional</FieldDescription>
-                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                </Field>
+                <DatePickerInput
+                  id={field.name}
+                  label="Due Date"
+                  value={field.value}
+                  onChange={field.onChange}
+                  error={fieldState.error}
+                />
               )}
             />
             <Controller
