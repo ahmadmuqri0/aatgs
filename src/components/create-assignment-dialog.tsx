@@ -1,11 +1,21 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { AlertCircleIcon, PlusIcon } from 'lucide-react';
+import { AlertCircleIcon, FileTextIcon, PlusIcon, XIcon } from 'lucide-react';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
 import { DatePickerInput } from '#/components/date-picker';
+import { Dropzone } from '#/components/dropzone';
 import { Alert, AlertDescription, AlertTitle } from '#/components/ui/alert';
+import {
+  Attachment,
+  AttachmentAction,
+  AttachmentActions,
+  AttachmentContent,
+  AttachmentDescription,
+  AttachmentMedia,
+  AttachmentTitle,
+} from '#/components/ui/attachment';
 import { Button } from '#/components/ui/button';
 import {
   Dialog,
@@ -17,13 +27,20 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '#/components/ui/dialog';
-import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '#/components/ui/field';
+import { Field, FieldError, FieldGroup, FieldLabel } from '#/components/ui/field';
 import { Input } from '#/components/ui/input';
 import {
   assignmentsQueryOptions,
   createAssignment,
 } from '#/feat/assignments/assignments.functions';
 import { createAssignmentSchema, type CreateAssignmentInput } from '#/feat/assignments/schema';
+
+function formatFileSize(bytes: number) {
+  if (bytes < 1024 * 1024) {
+    return `${(bytes / 1024).toFixed(1)} KB`;
+  }
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
 
 export function CreateAssignmentDialog() {
   const [open, setOpen] = useState(false);
@@ -119,18 +136,37 @@ export function CreateAssignmentDialog() {
             <Controller
               name="brief"
               control={control}
-              render={({ field: { value: _value, onChange, ...field }, fieldState }) => (
+              render={({ field: { value, onChange, ...field }, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor={field.name}>Assignment brief</FieldLabel>
-                  <Input
-                    {...field}
+                  <Dropzone
                     id={field.name}
-                    type="file"
-                    accept="application/pdf"
+                    accept={{ 'application/pdf': ['.pdf'] }}
+                    multiple={false}
                     aria-invalid={fieldState.invalid}
-                    onChange={(e) => onChange(e.target.files?.[0])}
+                    description="PDF only, up to 10 MB"
+                    onDrop={(accepted, rejected) => onChange(accepted[0] ?? rejected[0]?.file)}
+                    onFileDialogCancel={field.onBlur}
                   />
-                  <FieldDescription>PDF only, up to 10 MB</FieldDescription>
+                  {value && (
+                    <Attachment state={fieldState.invalid ? 'error' : 'done'} className="w-full">
+                      <AttachmentMedia>
+                        <FileTextIcon />
+                      </AttachmentMedia>
+                      <AttachmentContent>
+                        <AttachmentTitle>{value.name}</AttachmentTitle>
+                        <AttachmentDescription>{formatFileSize(value.size)}</AttachmentDescription>
+                      </AttachmentContent>
+                      <AttachmentActions>
+                        <AttachmentAction
+                          aria-label="Remove file"
+                          onClick={() => onChange(undefined)}
+                        >
+                          <XIcon />
+                        </AttachmentAction>
+                      </AttachmentActions>
+                    </Attachment>
+                  )}
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
               )}
