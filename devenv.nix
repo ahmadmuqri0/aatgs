@@ -26,6 +26,10 @@
   git-hooks.hooks = {
     oxlint = {
       enable = true;
+      excludes = [
+        "^\\.claude/"
+        "^\\.agents/"
+      ];
       settings = {
         binPath = "./node_modules/.bin/oxlint";
         configPath = "./oxlint.config.ts";
@@ -33,6 +37,13 @@
     };
     oxfmt = {
       enable = true;
+      excludes = [
+        "^\\.claude/"
+        "^\\.agents/"
+        "^src/components/ui/"
+        "^src/routeTree\\.gen\\.ts$"
+        "^drizzle/"
+      ];
       settings = {
         binPath = "./node_modules/.bin/oxfmt";
         configPath = "./oxfmt.config.ts";
