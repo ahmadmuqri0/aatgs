@@ -59,22 +59,5 @@
     "tsx": "^4.23.15",
     "typescript": "^6.0.2",
     "vite": "^8.0.0"
-  },
-  "intent": {
-    "skills": [
-      "@tanstack/react-router",
-      "@tanstack/react-start",
-      "@tanstack/router-core",
-      "@tanstack/start-client-core",
-      "@tanstack/start-server-core",
-      "@tanstack/virtual-file-routes"
-    ],
-    "exclude": [
-      "@tanstack/react-router#lifecycle/migrate-from-react-router",
-      "@tanstack/react-start#lifecycle/migrate-from-nextjs",
-      "@tanstack/react-start#react-start/server-components",
-      "@tanstack/start-client-core#start-core/deployment",
-      "@tanstack/virtual-file-routes#virtual-file-routes"
-    ]
   }
 }
