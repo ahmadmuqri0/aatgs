@@ -19,7 +19,7 @@ import { assignmentsQueryOptions } from '#/feat/assignments/assignments.function
 
 export const Route = createFileRoute('/_protected/assignments/')({
   loader: async ({ context }) => {
-    await context.queryClient.query({ ...assignmentsQueryOptions(), staleTime: 'static' });
+    await context.queryClient.query({ ...assignmentsQueryOptions() });
   },
   pendingComponent: AssignmentsPending,
   component: Assignments,
