@@ -1,0 +1,7 @@
+{
+  "skills": [
+    "../node_modules/@tanstack/react-router/skills/compositions/router-query",
+    "../node_modules/@tanstack/react-router/skills/react-router",
+    "../node_modules/@tanstack/react-start/skills/react-start"
+  ]
+}

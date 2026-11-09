@@ -33,8 +33,7 @@ Import modules under `src/` with the `#/` alias (e.g. `#/router`), defined in `p
 - `pnpm build` builds for production (also regenerates `src/routeTree.gen.ts`)
 - `pnpm lint` lints and type-checks
 - `pnpm format` formats the codebase with oxfmt (pass paths to format specific files)
-- `pnpm db:generate` generates a migration from schema changes
-- `pnpm db:migrate` applies migrations to the database
+- `pnpm db:generate` generates a migration from schema changes. use `--name=` to specify the migrations name
 - `pnpm db:studio` opens Drizzle Studio
 
 Environment variables (e.g. database file, Better Auth secret, Gemini API key) live in `.env`, which is gitignored; `.env.example` lists the required keys with placeholder values. They are server-only: read them only in `src/server`, `src/db`, `src/func`, or `drizzle.config.ts`. Never read or edit `.env` unless asked.
