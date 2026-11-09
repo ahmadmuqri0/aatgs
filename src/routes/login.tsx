@@ -12,8 +12,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#/com
 import { Checkbox } from '#/components/ui/checkbox';
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '#/components/ui/field';
 import { Input } from '#/components/ui/input';
-import { getSession } from '#/func/auth.function';
-import { authClient } from '#/lib/auth-client';
+import { authClient } from '#/feat/auth/auth-client';
+import { getSession } from '#/feat/auth/auth.functions';
 
 export const Route = createFileRoute('/login')({
   beforeLoad: async () => {

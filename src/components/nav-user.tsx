@@ -19,7 +19,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '#/components/ui/sidebar';
-import { authClient } from '#/lib/auth-client';
+import { authClient } from '#/feat/auth/auth-client';
 import { getInitials } from '#/lib/utils';
 
 export function NavUser({ user }: { user: User }) {

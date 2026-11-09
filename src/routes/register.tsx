@@ -11,8 +11,8 @@ import { Button } from '#/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#/components/ui/card';
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '#/components/ui/field';
 import { Input } from '#/components/ui/input';
-import { getSession } from '#/func/auth.function';
-import { authClient } from '#/lib/auth-client';
+import { authClient } from '#/feat/auth/auth-client';
+import { getSession } from '#/feat/auth/auth.functions';
 
 export const Route = createFileRoute('/register')({
   beforeLoad: async () => {

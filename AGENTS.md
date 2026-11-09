@@ -12,12 +12,12 @@ Automated Assignment Task Generation System or AATGS is a tanstack-start project
   - `src/components/ui` contains shadcn components; add them via the shadcn CLI rather than writing by hand
 - `src/hooks` contains React hooks
 - `src/types` contains shared TypeScript types
-- `src/lib` contains code shared across the app, safe for both client and server (e.g. `cn()` in `utils.ts`, the Better Auth client in `auth-client.ts`). Never put server-only code here
-- `src/server` contains server-only code (e.g. Better Auth instance in `auth.ts`, GeminiAI integration, business logic); only import it from `src/func`, server routes, or other server-only code, never from components or pages
-- `src/func` contains tanstack-start server functions (`createServerFn`) that expose `src/server` code to pages
-- `src/db` contains all database-related code, using drizzle ORM with SQLite (`better-sqlite3`); server-only, same import rule as `src/server`
-  - `src/db/schema` contains drizzle table schemas
-  - `src/db/relations.ts` defines drizzle relations
+- `src/lib` contains generic code shared across the app, safe for both client and server (e.g. `cn()` in `utils.ts`).
+- `src/feat` contains feature code, one folder per feature (e.g. `feat/auth/`, `feat/assignments/`). The client/server boundary is set by filename suffix:
+  - `*.functions.ts` exports tanstack-start server functions (`createServerFn`); safe to import anywhere
+  - `*.server.ts` is server-only code (DB queries, GeminiAI calls, business logic); only import it from server function handlers, server routes, or other server-only code, never from components or pages
+  - no suffix is client-safe code (types, zod schemas, constants, client SDKs)
+- `src/db` contains all database-related code, using drizzle ORM with SQLite (`better-sqlite3`)
 - `drizzle/` holds drizzle-kit generated migrations (default output dir); don't edit them by hand
 - `src/router.tsx` creates the router and wires in react-query SSR integration
 - `src/routeTree.gen.ts` is generated from `src/routes` by the tanstack router plugin; never edit it by hand
@@ -36,7 +36,7 @@ Import modules under `src/` with the `#/` alias (e.g. `#/router`), defined in `p
 - `pnpm db:generate` generates a migration from schema changes. use `--name=` to specify the migrations name
 - `pnpm db:studio` opens Drizzle Studio
 
-Environment variables (e.g. database file, Better Auth secret, Gemini API key) live in `.env`, which is gitignored; `.env.example` lists the required keys with placeholder values. They are server-only: read them only in `src/server`, `src/db`, `src/func`, or `drizzle.config.ts`. Never read or edit `.env` unless asked.
+Environment variables (e.g. database file, Better Auth secret, Gemini API key) live in `.env`, which is gitignored; `.env.example` lists the required keys with placeholder values. They are server-only: read them only in `*.server.ts` files, `src/db`, or `drizzle.config.ts`. Never read or edit `.env` unless asked.
 
 ## Git
 
