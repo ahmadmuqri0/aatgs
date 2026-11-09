@@ -19,10 +19,8 @@
       enable = true;
       package = pkgs.vtsls;
     };
-    pnpm = {
-      enable = true;
-      install.enable = true;
-    };
+    pnpm.enable = true;
+    npm.enable = true;
   };
 
   git-hooks.hooks = {
