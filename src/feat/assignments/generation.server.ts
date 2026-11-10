@@ -1,6 +1,15 @@
 import 'dotenv/config';
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
+
 import { GoogleGenAI } from '@google/genai';
+import { eq } from 'drizzle-orm';
 import z from 'zod';
+
+import { db } from '#/db';
+import { assignment, generation, task } from '#/db/schema';
+
+import { UPLOADS_DIR } from './assignments.server';
 
 const apiKey = process.env.GEMINI_API_KEY!;
 export const geminiModel = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
@@ -101,4 +110,63 @@ export async function generateTasks(pdf: Buffer) {
   }
 
   return tasks;
+}
+
+/**
+ * Creates a pending generation and runs it in the background without awaiting it.
+ * Safe because the app runs locally as one long-lived server process.
+ */
+export async function startGeneration(assignmentId: string) {
+  const [{ id }] = await db
+    .insert(generation)
+    .values({ assignmentId, model: geminiModel })
+    .returning({ id: generation.id });
+
+  void runGeneration(id, assignmentId);
+
+  return { id };
+}
+
+async function runGeneration(generationId: string, assignmentId: string) {
+  try {
+    const row = await db.query.assignment.findFirst({
+      where: { id: assignmentId },
+      columns: { fileKey: true },
+    });
+
+    if (!row) {
+      throw new Error('Assignment not found');
+    }
+
+    const pdf = await readFile(path.join(UPLOADS_DIR, row.fileKey));
+    const tasks = await generateTasks(pdf);
+
+    // tasks, status and the active pointer change together, so a half-saved list is never visible
+    db.transaction((tx) => {
+      tx.insert(task)
+        .values(
+          tasks.map((t, position) => ({
+            generationId,
+            position,
+            title: t.title,
+            description: t.description || null,
+          })),
+        )
+        .run();
+      tx.update(generation)
+        .set({ status: 'completed' })
+        .where(eq(generation.id, generationId))
+        .run();
+      tx.update(assignment)
+        .set({ activeGenerationId: generationId })
+        .where(eq(assignment.id, assignmentId))
+        .run();
+    });
+  } catch (error) {
+    console.error(`[gemini] generation ${generationId} failed:`, error);
+    await db
+      .update(generation)
+      .set({ status: 'failed', error: error instanceof Error ? error.message : String(error) })
+      .where(eq(generation.id, generationId));
+  }
 }

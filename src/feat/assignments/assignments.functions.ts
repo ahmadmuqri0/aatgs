@@ -4,6 +4,7 @@ import { createServerFn } from '@tanstack/react-start';
 import { ensureSession } from '#/feat/auth/auth.functions';
 
 import { insertAssignment, listAssignments } from './assignments.server';
+import { startGeneration } from './generation.server';
 import { createAssignmentSchema } from './schema';
 
 export const assignmentsQueryOptions = () =>
@@ -32,5 +33,8 @@ export const createAssignment = createServerFn({ method: 'POST' })
   .handler(async ({ data }) => {
     const session = await ensureSession();
 
-    return insertAssignment(session.user.id, data);
+    const { id } = await insertAssignment(session.user.id, data);
+    await startGeneration(id);
+
+    return { id };
   });

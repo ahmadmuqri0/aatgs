@@ -6,7 +6,7 @@ import { assignment } from '#/db/schema';
 
 import type { CreateAssignmentSchema } from './schema';
 
-const UPLOADS_DIR = process.env.UPLOADS_DIR || 'uploads';
+export const UPLOADS_DIR = process.env.UPLOADS_DIR || 'uploads';
 
 export async function listAssignments(userId: string) {
   const rows = await db.query.assignment.findMany({
