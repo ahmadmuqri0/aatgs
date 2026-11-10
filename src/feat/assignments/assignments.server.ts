@@ -41,6 +41,49 @@ export async function listAssignments(userId: string) {
   }));
 }
 
+export async function viewAssignment(id: string, userId: string) {
+  const row = await db.query.assignment.findFirst({
+    where: { id, userId },
+    columns: { id: true, title: true, dueDate: true, fileName: true, createdAt: true },
+    with: {
+      activeGeneration: {
+        columns: { id: true, model: true },
+        with: {
+          tasks: {
+            columns: {
+              id: true,
+              position: true,
+              title: true,
+              description: true,
+              completedAt: true,
+            },
+            orderBy: { position: 'asc' },
+          },
+        },
+      },
+      generations: {
+        columns: { status: true, error: true, createdAt: true },
+        orderBy: { createdAt: 'desc' },
+        limit: 1,
+      },
+    },
+  });
+
+  if (!row) {
+    return null;
+  }
+
+  const { generations, ...rest } = row;
+  const latest = generations[0];
+
+  return {
+    ...rest,
+    latestStatus: generationStatus(latest),
+    // only meaningful when it failed; a stale pending row has no message of its own
+    latestError: latest?.status === 'failed' ? latest.error : null,
+  };
+}
+
 export async function insertAssignment(userId: string, input: CreateAssignmentSchema) {
   const id = crypto.randomUUID();
   const fileKey = `${id}.pdf`;

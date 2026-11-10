@@ -1,5 +1,5 @@
 import { useSuspenseQuery } from '@tanstack/react-query';
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { FileTextIcon } from 'lucide-react';
 
 import { CreateAssignmentDialog } from '#/components/create-assignment-dialog';
@@ -61,33 +61,40 @@ function Assignments() {
       </div>
       <div className="grid auto-rows-min gap-4 md:grid-cols-2 lg:grid-cols-3">
         {assignments.map((assignment) => (
-          <Card key={assignment.id}>
-            <CardHeader>
-              <CardTitle className="truncate">{assignment.title}</CardTitle>
-              <CardDescription>
-                {assignment.dueDate
-                  ? `Due ${dateFormat.format(assignment.dueDate)}`
-                  : 'No due date'}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-3">
-              {assignment.latestStatus === 'pending' && (
-                <Badge variant="secondary">Generating…</Badge>
-              )}
-              {assignment.latestStatus === 'failed' && (
-                <Badge variant="destructive">Generation failed</Badge>
-              )}
-              {assignment.progress && (
-                <Progress value={assignment.progress.completed} max={assignment.progress.total}>
-                  <ProgressLabel>Tasks</ProgressLabel>
-                  <ProgressValue>
-                    {() => `${assignment.progress?.completed} / ${assignment.progress?.total}`}
-                  </ProgressValue>
-                </Progress>
-              )}
-              <p className="text-muted-foreground truncate">{assignment.fileName}</p>
-            </CardContent>
-          </Card>
+          <Link
+            key={assignment.id}
+            to="/assignments/$id"
+            params={{ id: assignment.id }}
+            className="focus-visible:ring-ring rounded-xl outline-none focus-visible:ring-2"
+          >
+            <Card className="hover:bg-muted/50 h-full transition-colors">
+              <CardHeader>
+                <CardTitle className="truncate">{assignment.title}</CardTitle>
+                <CardDescription>
+                  {assignment.dueDate
+                    ? `Due ${dateFormat.format(assignment.dueDate)}`
+                    : 'No due date'}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-3">
+                {assignment.latestStatus === 'pending' && (
+                  <Badge variant="secondary">Generating…</Badge>
+                )}
+                {assignment.latestStatus === 'failed' && (
+                  <Badge variant="destructive">Generation failed</Badge>
+                )}
+                {assignment.progress && (
+                  <Progress value={assignment.progress.completed} max={assignment.progress.total}>
+                    <ProgressLabel>Tasks</ProgressLabel>
+                    <ProgressValue>
+                      {() => `${assignment.progress?.completed} / ${assignment.progress?.total}`}
+                    </ProgressValue>
+                  </Progress>
+                )}
+                <p className="text-muted-foreground truncate">{assignment.fileName}</p>
+              </CardContent>
+            </Card>
+          </Link>
         ))}
       </div>
     </div>

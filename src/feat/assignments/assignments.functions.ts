@@ -3,7 +3,7 @@ import { createServerFn } from '@tanstack/react-start';
 
 import { ensureSession } from '#/feat/auth/auth.functions';
 
-import { insertAssignment, listAssignments } from './assignments.server';
+import { insertAssignment, listAssignments, viewAssignment } from './assignments.server';
 import { startGeneration } from './generation.server';
 import { createAssignmentSchema } from './schema';
 
@@ -13,10 +13,23 @@ export const assignmentsQueryOptions = () =>
     queryFn: () => getAssignments(),
   });
 
+export const assignmentQueryOptions = (id: string) =>
+  queryOptions({
+    queryKey: ['assignment', id],
+    queryFn: () => getAssignment({ data: { id } }),
+  });
+
 export const getAssignments = createServerFn({ method: 'GET' }).handler(async () => {
   const session = await ensureSession();
   return listAssignments(session.user.id);
 });
+
+export const getAssignment = createServerFn({ method: 'GET' })
+  .validator((data: { id: string }) => data)
+  .handler(async ({ data }) => {
+    const session = await ensureSession();
+    return viewAssignment(data.id, session.user.id);
+  });
 
 export const createAssignment = createServerFn({ method: 'POST' })
   .validator((data: unknown) => {
