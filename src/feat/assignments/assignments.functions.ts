@@ -6,6 +6,7 @@ import { ensureSession } from '#/feat/auth/auth.functions';
 import {
   insertAssignment,
   listAssignments,
+  removeAssignment,
   updateTaskCompleted,
   viewAssignment,
 } from './assignments.server';
@@ -85,4 +86,12 @@ export const retryGeneration = createServerFn({ method: 'POST' })
     }
 
     return startGeneration(assignment.id);
+  });
+
+export const deleteAssignment = createServerFn({ method: 'POST' })
+  .validator((data: { id: string }) => data)
+  .handler(async ({ data }) => {
+    const session = await ensureSession();
+
+    await removeAssignment(data.id, session.user.id);
   });

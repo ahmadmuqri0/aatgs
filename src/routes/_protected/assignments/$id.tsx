@@ -2,6 +2,7 @@ import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-q
 import { createFileRoute, notFound } from '@tanstack/react-router';
 import { AlertCircleIcon, Loader2Icon, RefreshCwIcon } from 'lucide-react';
 
+import { DeleteAssignmentDialog } from '#/components/delete-assignment-dialog';
 import { Alert, AlertDescription, AlertTitle } from '#/components/ui/alert';
 import { Badge } from '#/components/ui/badge';
 import { Button } from '#/components/ui/button';
@@ -83,6 +84,9 @@ function Assignment() {
             {assignment.latestStatus === 'failed' && (
               <Badge variant="destructive">Generation failed</Badge>
             )}
+            <div className="ml-auto shrink-0">
+              <DeleteAssignmentDialog id={assignment.id} />
+            </div>
           </div>
           <p className="text-muted-foreground text-sm">
             {assignment.dueDate ? `Due by ${dateFormat.format(assignment.dueDate)}` : 'No due date'}

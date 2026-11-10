@@ -151,3 +151,18 @@ export async function updateTaskCompleted(
     throw new Error('Task not found');
   }
 }
+
+export async function removeAssignment(id: string, userId: string) {
+  // generations and tasks are removed by the foreign key cascades
+  const [deleted] = await db
+    .delete(assignment)
+    .where(and(eq(assignment.id, id), eq(assignment.userId, userId)))
+    .returning({ fileKey: assignment.fileKey });
+
+  if (!deleted) {
+    throw new Error('Assignment not found');
+  }
+
+  // after the row, so a failed file removal only leaves an orphaned upload behind
+  await rm(path.join(UPLOADS_DIR, deleted.fileKey), { force: true });
+}
