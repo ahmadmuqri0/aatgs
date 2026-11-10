@@ -1,10 +1,12 @@
 import { mkdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
-import { db } from '#/db';
-import { assignment } from '#/db/schema';
+import { and, eq, inArray } from 'drizzle-orm';
 
-import type { CreateAssignmentSchema } from './schema';
+import { db } from '#/db';
+import { assignment, generation, task } from '#/db/schema';
+
+import type { CreateAssignmentSchema, SetTaskCompletedSchema } from './schema';
 
 export const UPLOADS_DIR = process.env.UPLOADS_DIR || 'uploads';
 // a generation still pending after this was interrupted (e.g. a server restart); must exceed the
@@ -126,4 +128,26 @@ function generationStatus(latest?: {
   }
 
   return latest.status;
+}
+
+export async function updateTaskCompleted(
+  userId: string,
+  { taskId, completed }: SetTaskCompletedSchema,
+) {
+  // generations of this user's assignments; a task outside them is treated as not found
+  const ownGenerations = db
+    .select({ id: generation.id })
+    .from(generation)
+    .innerJoin(assignment, eq(assignment.id, generation.assignmentId))
+    .where(eq(assignment.userId, userId));
+
+  const updated = await db
+    .update(task)
+    .set({ completedAt: completed ? new Date() : null })
+    .where(and(eq(task.id, taskId), inArray(task.generationId, ownGenerations)))
+    .returning({ id: task.id });
+
+  if (updated.length === 0) {
+    throw new Error('Task not found');
+  }
 }

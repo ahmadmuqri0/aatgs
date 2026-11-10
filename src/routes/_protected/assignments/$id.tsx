@@ -1,8 +1,16 @@
-import { useSuspenseQuery } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, notFound } from '@tanstack/react-router';
 
+import { Checkbox } from '#/components/ui/checkbox';
+import { Field, FieldContent, FieldDescription, FieldLabel } from '#/components/ui/field';
 import { Skeleton } from '#/components/ui/skeleton';
-import { assignmentQueryOptions } from '#/feat/assignments/assignments.functions';
+import {
+  assignmentQueryOptions,
+  assignmentsQueryOptions,
+  setTaskCompleted,
+} from '#/feat/assignments/assignments.functions';
+import type { SetTaskCompletedSchema } from '#/feat/assignments/schema';
+import { cn } from '#/lib/utils';
 
 export const Route = createFileRoute('/_protected/assignments/$id')({
   loader: async ({ context, params }) => {
@@ -20,6 +28,17 @@ function Assignment() {
   const { data: assignment } = useSuspenseQuery({
     ...assignmentQueryOptions(id),
     refetchInterval: (query) => (query.state.data?.latestStatus === 'pending' ? 3000 : false),
+  });
+
+  const queryClient = useQueryClient();
+  const { mutate, isPending, variables } = useMutation({
+    mutationFn: (data: SetTaskCompletedSchema) => setTaskCompleted({ data }),
+    // refetch this page and the list, whose cards show task progress
+    onSettled: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: assignmentQueryOptions(id).queryKey }),
+        queryClient.invalidateQueries({ queryKey: assignmentsQueryOptions().queryKey }),
+      ]),
   });
   if (!assignment) {
     return null;
@@ -40,15 +59,27 @@ function Assignment() {
       </div>
 
       {assignment.activeGeneration ? (
-        <div className="flex flex-col gap-3">
-          {assignment.activeGeneration.tasks.map((task) => (
-            <div key={task.id}>
-              <p>
-                {task.position + 1}. {task.title} {task.completedAt ? '(done)' : ''}
-              </p>
-              {task.description && <p>{task.description}</p>}
-            </div>
-          ))}
+        <div className="flex flex-col gap-4">
+          {assignment.activeGeneration.tasks.map((task) => {
+            const isUpdating = isPending && variables?.taskId === task.id;
+
+            return (
+              <Field key={task.id} orientation="horizontal">
+                <Checkbox
+                  id={task.id}
+                  checked={!!task.completedAt}
+                  disabled={isUpdating}
+                  onCheckedChange={(checked) => mutate({ taskId: task.id, completed: checked })}
+                />
+                <FieldContent>
+                  <FieldLabel htmlFor={task.id} className={cn(task.completedAt && 'line-through')}>
+                    {task.position + 1}. {task.title}
+                  </FieldLabel>
+                  {task.description && <FieldDescription>{task.description}</FieldDescription>}
+                </FieldContent>
+              </Field>
+            );
+          })}
         </div>
       ) : (
         <p>No tasks yet</p>

@@ -3,9 +3,18 @@ import { createServerFn } from '@tanstack/react-start';
 
 import { ensureSession } from '#/feat/auth/auth.functions';
 
-import { insertAssignment, listAssignments, viewAssignment } from './assignments.server';
+import {
+  insertAssignment,
+  listAssignments,
+  updateTaskCompleted,
+  viewAssignment,
+} from './assignments.server';
 import { startGeneration } from './generation.server';
-import { createAssignmentSchema } from './schema';
+import {
+  createAssignmentSchema,
+  setTaskCompletedSchema,
+  type SetTaskCompletedSchema,
+} from './schema';
 
 export const assignmentsQueryOptions = () =>
   queryOptions({
@@ -50,4 +59,12 @@ export const createAssignment = createServerFn({ method: 'POST' })
     await startGeneration(id);
 
     return { id };
+  });
+
+export const setTaskCompleted = createServerFn({ method: 'POST' })
+  .validator((data: SetTaskCompletedSchema) => setTaskCompletedSchema.parse(data))
+  .handler(async ({ data }) => {
+    const session = await ensureSession();
+
+    await updateTaskCompleted(session.user.id, data);
   });

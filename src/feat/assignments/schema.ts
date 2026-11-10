@@ -12,3 +12,11 @@ export const createAssignmentSchema = z.object({
 });
 
 export type CreateAssignmentSchema = z.infer<typeof createAssignmentSchema>;
+
+export const setTaskCompletedSchema = z.object({
+  taskId: z.string().min(1),
+  // the desired state rather than a toggle, so repeated or retried requests give the same result
+  completed: z.boolean(),
+});
+
+export type SetTaskCompletedSchema = z.infer<typeof setTaskCompletedSchema>;
