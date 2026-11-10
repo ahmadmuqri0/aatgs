@@ -1,5 +1,6 @@
 allowBuilds:
   esbuild: true
   lightningcss: true
+  protobufjs: set this to true or false
 packages:
   - .
