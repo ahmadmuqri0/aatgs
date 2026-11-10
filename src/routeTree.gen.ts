@@ -15,6 +15,7 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ProtectedIndexRouteImport } from './routes/_protected/index'
 import { Route as ProtectedAssignmentsRouteImport } from './routes/_protected/assignments'
 import { Route as ProtectedAssignmentsIndexRouteImport } from './routes/_protected/assignments/index'
+import { Route as ProtectedAssignmentsIdRouteImport } from './routes/_protected/assignments/$id'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const ProtectedRoute = ProtectedRouteImport.update({
@@ -47,6 +48,11 @@ const ProtectedAssignmentsIndexRoute =
     path: '/',
     getParentRoute: () => ProtectedAssignmentsRoute,
   } as any)
+const ProtectedAssignmentsIdRoute = ProtectedAssignmentsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ProtectedAssignmentsRoute,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -58,6 +64,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/assignments': typeof ProtectedAssignmentsRouteWithChildren
+  '/assignments/$id': typeof ProtectedAssignmentsIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/assignments/': typeof ProtectedAssignmentsIndexRoute
 }
@@ -65,6 +72,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/': typeof ProtectedIndexRoute
+  '/assignments/$id': typeof ProtectedAssignmentsIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/assignments': typeof ProtectedAssignmentsIndexRoute
 }
@@ -75,6 +83,7 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/_protected/assignments': typeof ProtectedAssignmentsRouteWithChildren
   '/_protected/': typeof ProtectedIndexRoute
+  '/_protected/assignments/$id': typeof ProtectedAssignmentsIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/_protected/assignments/': typeof ProtectedAssignmentsIndexRoute
 }
@@ -85,10 +94,17 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/assignments'
+    | '/assignments/$id'
     | '/api/auth/$'
     | '/assignments/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/register' | '/' | '/api/auth/$' | '/assignments'
+  to:
+    | '/login'
+    | '/register'
+    | '/'
+    | '/assignments/$id'
+    | '/api/auth/$'
+    | '/assignments'
   id:
     | '__root__'
     | '/_protected'
@@ -96,6 +112,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/_protected/assignments'
     | '/_protected/'
+    | '/_protected/assignments/$id'
     | '/api/auth/$'
     | '/_protected/assignments/'
   fileRoutesById: FileRoutesById
@@ -151,6 +168,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedAssignmentsIndexRouteImport
       parentRoute: typeof ProtectedAssignmentsRoute
     }
+    '/_protected/assignments/$id': {
+      id: '/_protected/assignments/$id'
+      path: '/$id'
+      fullPath: '/assignments/$id'
+      preLoaderRoute: typeof ProtectedAssignmentsIdRouteImport
+      parentRoute: typeof ProtectedAssignmentsRoute
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -162,10 +186,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface ProtectedAssignmentsRouteChildren {
+  ProtectedAssignmentsIdRoute: typeof ProtectedAssignmentsIdRoute
   ProtectedAssignmentsIndexRoute: typeof ProtectedAssignmentsIndexRoute
 }
 
 const ProtectedAssignmentsRouteChildren: ProtectedAssignmentsRouteChildren = {
+  ProtectedAssignmentsIdRoute: ProtectedAssignmentsIdRoute,
   ProtectedAssignmentsIndexRoute: ProtectedAssignmentsIndexRoute,
 }
 

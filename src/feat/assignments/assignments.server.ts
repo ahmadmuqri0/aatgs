@@ -7,6 +7,9 @@ import { assignment } from '#/db/schema';
 import type { CreateAssignmentSchema } from './schema';
 
 export const UPLOADS_DIR = process.env.UPLOADS_DIR || 'uploads';
+// a generation still pending after this was interrupted (e.g. a server restart); must exceed the
+// worst case in generation.server.ts: 4 attempts × 2 min timeout + backoff ≈ 8.5 min
+const STALE_GENERATION_MS = 10 * 60 * 1000;
 
 export async function listAssignments(userId: string) {
   const rows = await db.query.assignment.findMany({
@@ -19,7 +22,7 @@ export async function listAssignments(userId: string) {
         with: { tasks: { columns: { completedAt: true } } },
       },
       generations: {
-        columns: { status: true },
+        columns: { status: true, createdAt: true },
         orderBy: { createdAt: 'desc' },
         limit: 1,
       },
@@ -28,7 +31,7 @@ export async function listAssignments(userId: string) {
 
   return rows.map(({ activeGeneration, generations, ...assignment }) => ({
     ...assignment,
-    latestStatus: generations[0]?.status ?? null,
+    latestStatus: generationStatus(generations[0]),
     progress: activeGeneration
       ? {
           completed: activeGeneration.tasks.filter((t) => t.completedAt).length,
@@ -62,4 +65,22 @@ export async function insertAssignment(userId: string, input: CreateAssignmentSc
   }
 
   return { id };
+}
+
+function generationStatus(latest?: {
+  status: 'pending' | 'completed' | 'failed';
+  createdAt: Date;
+}) {
+  if (!latest) {
+    return null;
+  }
+
+  if (
+    latest.status === 'pending' &&
+    Date.now() - latest.createdAt.getTime() > STALE_GENERATION_MS
+  ) {
+    return 'failed';
+  }
+
+  return latest.status;
 }

@@ -28,7 +28,12 @@ export const Route = createFileRoute('/_protected/assignments/')({
 const dateFormat = new Intl.DateTimeFormat('en-MY', { dateStyle: 'medium' });
 
 function Assignments() {
-  const { data: assignments } = useSuspenseQuery(assignmentsQueryOptions());
+  const { data: assignments } = useSuspenseQuery({
+    ...assignmentsQueryOptions(),
+    // poll while a task list is being generated so the card updates without a reload
+    refetchInterval: (query) =>
+      query.state.data?.some((a) => a.latestStatus === 'pending') ? 3000 : false,
+  });
 
   if (assignments.length === 0) {
     return (
