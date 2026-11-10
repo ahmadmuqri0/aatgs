@@ -4,7 +4,7 @@ import path from 'node:path';
 import { db } from '#/db';
 import { assignment } from '#/db/schema';
 
-import type { CreateAssignmentInput } from './schema';
+import type { CreateAssignmentSchema } from './schema';
 
 const UPLOADS_DIR = process.env.UPLOADS_DIR || 'uploads';
 
@@ -38,13 +38,13 @@ export async function listAssignments(userId: string) {
   }));
 }
 
-export async function insertAssignment(userId: string, input: CreateAssignmentInput) {
+export async function insertAssignment(userId: string, input: CreateAssignmentSchema) {
   const id = crypto.randomUUID();
   const fileKey = `${id}.pdf`;
   const filePath = path.join(UPLOADS_DIR, fileKey);
 
   await mkdir(UPLOADS_DIR, { recursive: true });
-  await writeFile(filePath, new Uint8Array(await input.brief.arrayBuffer()));
+  await writeFile(filePath, new Uint8Array(await input.docs.arrayBuffer()));
 
   try {
     await db.insert(assignment).values({
@@ -52,9 +52,9 @@ export async function insertAssignment(userId: string, input: CreateAssignmentIn
       userId,
       title: input.title,
       dueDate: input.dueDate ? new Date(`${input.dueDate}T00:00:00`) : null,
-      fileName: input.brief.name,
+      fileName: input.docs.name,
       fileKey,
-      fileSize: input.brief.size,
+      fileSize: input.docs.size,
     });
   } catch (error) {
     await rm(filePath, { force: true });

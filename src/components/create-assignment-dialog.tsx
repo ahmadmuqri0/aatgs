@@ -33,7 +33,7 @@ import {
   assignmentsQueryOptions,
   createAssignment,
 } from '#/feat/assignments/assignments.functions';
-import { createAssignmentSchema, type CreateAssignmentInput } from '#/feat/assignments/schema';
+import { createAssignmentSchema, type CreateAssignmentSchema } from '#/feat/assignments/schema';
 
 function formatFileSize(bytes: number) {
   if (bytes < 1024 * 1024) {
@@ -45,12 +45,12 @@ function formatFileSize(bytes: number) {
 export function CreateAssignmentDialog() {
   const [open, setOpen] = useState(false);
 
-  const { control, handleSubmit, reset } = useForm<CreateAssignmentInput>({
+  const { control, handleSubmit, reset } = useForm<CreateAssignmentSchema>({
     resolver: zodResolver(createAssignmentSchema),
     defaultValues: {
       title: '',
       dueDate: '',
-      brief: undefined,
+      docs: undefined,
     },
   });
 
@@ -63,11 +63,13 @@ export function CreateAssignmentDialog() {
     isPending,
     reset: resetMutation,
   } = useMutation({
-    mutationFn: (input: CreateAssignmentInput) => {
+    mutationFn: (input: CreateAssignmentSchema) => {
       const formData = new FormData();
+
       formData.set('title', input.title);
       formData.set('dueDate', input.dueDate);
-      formData.set('brief', input.brief);
+      formData.set('docs', input.docs);
+
       return createAssignment({ data: formData });
     },
     onSuccess: async () => {
@@ -84,7 +86,7 @@ export function CreateAssignmentDialog() {
     }
   }
 
-  function onSubmit(data: CreateAssignmentInput) {
+  function onSubmit(data: CreateAssignmentSchema) {
     mutate(data);
   }
 
@@ -98,7 +100,7 @@ export function CreateAssignmentDialog() {
         <DialogHeader>
           <DialogTitle>New assignment</DialogTitle>
           <DialogDescription>
-            Upload your assignment brief and we&apos;ll break it into tasks.
+            Upload your assignment docs and we&apos;ll break it into tasks.
           </DialogDescription>
         </DialogHeader>
         <form id="create-assignment-form" onSubmit={handleSubmit(onSubmit)}>
@@ -126,7 +128,7 @@ export function CreateAssignmentDialog() {
               render={({ field, fieldState }) => (
                 <DatePickerInput
                   id={field.name}
-                  label="Due Date"
+                  label="Due date"
                   value={field.value}
                   onChange={field.onChange}
                   error={fieldState.error}
@@ -134,16 +136,17 @@ export function CreateAssignmentDialog() {
               )}
             />
             <Controller
-              name="brief"
+              name="docs"
               control={control}
               render={({ field: { value, onChange, ...field }, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>Assignment brief</FieldLabel>
+                  <FieldLabel htmlFor={field.name}>Assignment docs</FieldLabel>
                   <Dropzone
                     id={field.name}
                     accept={{ 'application/pdf': ['.pdf'] }}
                     multiple={false}
                     aria-invalid={fieldState.invalid}
+                    disabled={isPending}
                     description="PDF only, up to 10 MB"
                     onDrop={(accepted, rejected) => onChange(accepted[0] ?? rejected[0]?.file)}
                     onFileDialogCancel={field.onBlur}

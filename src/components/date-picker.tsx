@@ -1,4 +1,4 @@
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, XIcon } from 'lucide-react';
 import * as React from 'react';
 
 import { Calendar } from '#/components/ui/calendar';
@@ -23,14 +23,6 @@ function formatDate(date: Date | undefined) {
   });
 }
 
-function isValidDate(date: Date | undefined) {
-  if (!date) {
-    return false;
-  }
-  return !isNaN(date.getTime());
-}
-
-// 'YYYY-MM-DD' -> local Date (avoids the UTC shift of new Date('YYYY-MM-DD'))
 function parseIsoDate(value: string) {
   if (!value) {
     return undefined;
@@ -40,7 +32,6 @@ function parseIsoDate(value: string) {
   return new Date(year, month - 1, day);
 }
 
-// local Date -> 'YYYY-MM-DD'
 function toIsoDate(date: Date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -48,22 +39,11 @@ function toIsoDate(date: Date) {
   return `${year}-${month}-${day}`;
 }
 
-// typed text -> 'YYYY-MM-DD', '' when empty, undefined when unparseable
-function textToIsoDate(text: string) {
-  if (!text.trim()) {
-    return '';
-  }
-
-  const date = new Date(text);
-  return isValidDate(date) ? toIsoDate(date) : undefined;
-}
-
 type DatePickerInputProps = {
   id: string;
   label: string;
   description?: string;
   placeholder?: string;
-  // 'YYYY-MM-DD', or '' when no date is set
   value: string;
   onChange: (value: string) => void;
   error?: { message?: string };
@@ -82,57 +62,46 @@ export function DatePickerInput({
 
   const [open, setOpen] = React.useState(false);
   const [month, setMonth] = React.useState<Date | undefined>(selected);
-  const [text, setText] = React.useState(formatDate(selected));
-  const [prevValue, setPrevValue] = React.useState(value);
 
-  // sync the text when value changes from outside (e.g. form reset), but not
-  // when the change came from typing, so the user's text isn't reformatted mid-edit
-  if (value !== prevValue) {
-    setPrevValue(value);
-    if (value !== textToIsoDate(text)) {
-      setText(formatDate(selected));
+  function onOpenChange(next: boolean) {
+    if (next) {
       setMonth(selected);
     }
+    setOpen(next);
   }
 
   return (
     <Field data-invalid={!!error}>
       <FieldLabel htmlFor={id}>{label}</FieldLabel>
       <InputGroup>
+        {/* read-only: dates are picked from the calendar, typed text is too ambiguous to parse */}
         <InputGroupInput
           id={id}
-          value={text}
+          value={formatDate(selected)}
           placeholder={placeholder}
           aria-invalid={!!error}
-          autoComplete="off"
-          onChange={(e) => {
-            const typed = e.target.value;
-            setText(typed);
-
-            if (!typed.trim()) {
-              onChange('');
-              return;
-            }
-
-            const date = new Date(typed);
-            if (isValidDate(date)) {
-              setMonth(date);
-              onChange(toIsoDate(date));
-            }
-          }}
-          onBlur={() => {
-            // revert unparseable text to the committed value
-            setText(formatDate(selected));
-          }}
+          readOnly
+          className="cursor-pointer"
+          onClick={() => onOpenChange(true)}
           onKeyDown={(e) => {
-            if (e.key === 'ArrowDown') {
+            if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
-              setOpen(true);
+              onOpenChange(true);
             }
           }}
         />
         <InputGroupAddon align="inline-end">
-          <Popover open={open} onOpenChange={setOpen}>
+          {selected && (
+            <InputGroupButton
+              variant="ghost"
+              size="icon-xs"
+              aria-label="Clear date"
+              onClick={() => onChange('')}
+            >
+              <XIcon />
+            </InputGroupButton>
+          )}
+          <Popover open={open} onOpenChange={onOpenChange}>
             <PopoverTrigger
               render={
                 <InputGroupButton
@@ -142,7 +111,6 @@ export function DatePickerInput({
                   aria-label="Select date"
                 >
                   <CalendarIcon />
-                  <span className="sr-only">Select date</span>
                 </InputGroupButton>
               }
             />
@@ -162,7 +130,6 @@ export function DatePickerInput({
                     return;
                   }
 
-                  setText(formatDate(date));
                   onChange(toIsoDate(date));
                   setOpen(false);
                 }}

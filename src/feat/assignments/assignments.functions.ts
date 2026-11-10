@@ -20,13 +20,13 @@ export const getAssignments = createServerFn({ method: 'GET' }).handler(async ()
 export const createAssignment = createServerFn({ method: 'POST' })
   .validator((data: unknown) => {
     if (!(data instanceof FormData)) {
-      throw new Error('Expected FormData');
+      throw new Error('data must be FormData');
     }
 
     return createAssignmentSchema.parse({
       title: data.get('title'),
       dueDate: data.get('dueDate') ?? '',
-      brief: data.get('brief'),
+      docs: data.get('docs'),
     });
   })
   .handler(async ({ data }) => {
