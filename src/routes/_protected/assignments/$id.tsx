@@ -1,12 +1,15 @@
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, notFound } from '@tanstack/react-router';
+import { RefreshCwIcon } from 'lucide-react';
 
+import { Button } from '#/components/ui/button';
 import { Checkbox } from '#/components/ui/checkbox';
 import { Field, FieldContent, FieldDescription, FieldLabel } from '#/components/ui/field';
 import { Skeleton } from '#/components/ui/skeleton';
 import {
   assignmentQueryOptions,
   assignmentsQueryOptions,
+  retryGeneration,
   setTaskCompleted,
 } from '#/feat/assignments/assignments.functions';
 import type { SetTaskCompletedSchema } from '#/feat/assignments/schema';
@@ -31,14 +34,22 @@ function Assignment() {
   });
 
   const queryClient = useQueryClient();
+  // refetch this page and the list, whose cards show task progress and generation status
+  const refetchAssignment = () =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: assignmentQueryOptions(id).queryKey }),
+      queryClient.invalidateQueries({ queryKey: assignmentsQueryOptions().queryKey }),
+    ]);
+
   const { mutate, isPending, variables } = useMutation({
     mutationFn: (data: SetTaskCompletedSchema) => setTaskCompleted({ data }),
-    // refetch this page and the list, whose cards show task progress
-    onSettled: () =>
-      Promise.all([
-        queryClient.invalidateQueries({ queryKey: assignmentQueryOptions(id).queryKey }),
-        queryClient.invalidateQueries({ queryKey: assignmentsQueryOptions().queryKey }),
-      ]),
+    onSettled: refetchAssignment,
+  });
+
+  // the refetch sees the new pending generation, which starts the polling above
+  const retry = useMutation({
+    mutationFn: () => retryGeneration({ data: { id } }),
+    onSuccess: refetchAssignment,
   });
   if (!assignment) {
     return null;
@@ -53,7 +64,20 @@ function Assignment() {
         <p>Created: {dateFormat.format(assignment.createdAt)}</p>
         <p>Status: {assignment.latestStatus ?? 'none'}</p>
         {assignment.latestStatus === 'failed' && (
-          <p>Error: {assignment.latestError ?? 'Generation was interrupted'}</p>
+          <>
+            <p>Error: {assignment.latestError ?? 'Generation was interrupted'}</p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-2"
+              disabled={retry.isPending}
+              onClick={() => retry.mutate()}
+            >
+              <RefreshCwIcon data-icon="inline-start" />
+              Retry
+            </Button>
+            {retry.isError && <p className="text-destructive">{retry.error.message}</p>}
+          </>
         )}
         {assignment.activeGeneration && <p>Model: {assignment.activeGeneration.model}</p>}
       </div>

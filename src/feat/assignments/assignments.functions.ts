@@ -68,3 +68,21 @@ export const setTaskCompleted = createServerFn({ method: 'POST' })
 
     await updateTaskCompleted(session.user.id, data);
   });
+
+export const retryGeneration = createServerFn({ method: 'POST' })
+  .validator((data: { id: string }) => data)
+  .handler(async ({ data }) => {
+    const session = await ensureSession();
+    // scoped to the user, and reuses the stale check so an interrupted generation can be retried
+    const assignment = await viewAssignment(data.id, session.user.id);
+
+    if (!assignment) {
+      throw new Error('Assignment not found');
+    }
+
+    if (assignment.latestStatus === 'pending') {
+      throw new Error('A task list is already being generated');
+    }
+
+    return startGeneration(assignment.id);
+  });
