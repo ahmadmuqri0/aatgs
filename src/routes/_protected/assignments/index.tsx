@@ -25,7 +25,7 @@ export const Route = createFileRoute('/_protected/assignments/')({
   component: Assignments,
 });
 
-const dateFormat = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' });
+const dateFormat = new Intl.DateTimeFormat('en-MY', { dateStyle: 'medium' });
 
 function Assignments() {
   const { data: assignments } = useSuspenseQuery(assignmentsQueryOptions());
